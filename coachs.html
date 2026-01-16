@@ -2,13 +2,20 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>FIT MANAGER | Experts</title>
+    <title>FIT MANAGER | Gestion Experts</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Style spécifique pour l'avatar dans le tableau */
+        .coach-avatar {
+            width: 40px; height: 40px; border-radius: 50%; 
+            object-fit: cover; border: 2px solid #FFD700; margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
 
@@ -29,8 +36,8 @@
     <div id="page-content">
         
         <div class="page-heading">
-            <h1>Équipe Experts</h1>
-            <p>Gestion des coachs et évaluations clients.</p>
+            <h1>Staff & Experts</h1>
+            <p>Gestion des profils coachs et suivi des notations.</p>
         </div>
 
         <div class="top-actions no-print">
@@ -44,9 +51,9 @@
                 <thead>
                     <tr>
                         <th style="width: 10%">ID</th>
-                        <th style="width: 30%">Nom Expert</th>
-                        <th style="width: 30%">Spécialité</th>
-                        <th style="width: 20%">Note Clients</th>
+                        <th style="width: 30%">Expert</th>
+                        <th style="width: 20%">Spécialité</th>
+                        <th style="width: 25%">Note Clients</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -69,24 +76,23 @@
                         
                         <div class="mb-3">
                             <label class="form-label">NOM COMPLET</label>
-                            <input type="text" class="form-control" id="coachName" required placeholder="Ex: Mike Tyson">
+                            <input type="text" class="form-control" id="coachName" required placeholder="Ex: Mike Israetel">
                         </div>
                         
                         <div class="mb-3">
                             <label class="form-label">SPÉCIALITÉ</label>
-                            <select class="form-select" id="coachSpe">
-                                <option>Musculation</option>
-                                <option>Cardio</option>
-                                <option>Yoga</option>
-                                <option>Crossfit</option>
-                                <option>Boxe</option>
-                                <option>Nutrition</option>
-                            </select>
+                            <input type="text" class="form-control" id="coachSpe" required placeholder="Ex: Hypertrophie, Boxe...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">IMAGE (Chemin ou URL)</label>
+                            <input type="text" class="form-control" id="coachImg" placeholder="images/mike.jpg">
+                            <small class="text-muted" style="font-size: 0.7rem;">Si vide, une image par défaut sera utilisée.</small>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">NOTE (0 à 5)</label>
-                            <input type="number" step="0.1" min="0" max="5" class="form-control" id="coachRating" required placeholder="5.0">
+                            <label class="form-label">NOTE INITIALE (0 à 5)</label>
+                            <input type="number" step="0.1" min="0" max="5" class="form-control" id="coachRating" value="5.0">
                         </div>
                         
                         <button type="submit" class="btn-gold w-100 mt-2">ENREGISTRER</button>
@@ -102,114 +108,121 @@
     <script>
         let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
 
-        /**
-         * FONCTION DE STYLE DYNAMIQUE
-         * Retourne le CSS pour colorer le badge selon la spécialité.
-         * (Ex: Rouge pour Muscu, Bleu pour Cardio, Vert pour Yoga...)
-         */
         function getSpeStyle(spe) {
-            const s = spe.toLowerCase();
-            
-            // Couleurs "Néon" sur fond sombre (avec transparence)
-            if(s.includes('muscu')) return 'background:rgba(255, 69, 58, 0.15); color:#FF453A; border-color:rgba(255, 69, 58, 0.3);'; 
-            if(s.includes('cardio')) return 'background:rgba(10, 132, 255, 0.15); color:#5AC8FA; border-color:rgba(10, 132, 255, 0.3);'; 
-            if(s.includes('yoga')) return 'background:rgba(48, 209, 88, 0.15); color:#32D74B; border-color:rgba(48, 209, 88, 0.3);'; 
-            if(s.includes('boxe')) return 'background:rgba(255, 159, 10, 0.15); color:#FF9F0A; border-color:rgba(255, 159, 10, 0.3);'; 
-            if(s.includes('crossfit')) return 'background:rgba(191, 90, 242, 0.15); color:#BF5AF2; border-color:rgba(191, 90, 242, 0.3);'; 
-            
-            // Nutrition en Vert Émeraude
-            if(s.includes('nutrition') || s.includes('diet')) return 'background:rgba(0, 209, 178, 0.15); color:#00D1B2; border-color:rgba(0, 209, 178, 0.3);';
-
-            // Par défaut
-            return 'background:rgba(255,255,255,0.1); color:#fff; border-color:#555;';
+            const s = spe ? spe.toLowerCase() : '';
+            if(s.includes('muscu') || s.includes('hyper')) return 'color:#FF453A; border:1px solid rgba(255,69,58,0.3); background:rgba(255,69,58,0.1);'; 
+            if(s.includes('cardio')) return 'color:#5AC8FA; border:1px solid rgba(90,200,250,0.3); background:rgba(90,200,250,0.1);'; 
+            if(s.includes('yoga')) return 'color:#32D74B; border:1px solid rgba(50,215,75,0.3); background:rgba(50,215,75,0.1);'; 
+            if(s.includes('boxe') || s.includes('mma')) return 'color:#FF9F0A; border:1px solid rgba(255,159,10,0.3); background:rgba(255,159,10,0.1);'; 
+            if(s.includes('nutri')) return 'color:#30D158; border:1px solid rgba(48,209,88,0.3); background:rgba(48,209,88,0.1);'; 
+            return 'color:#fff; border:1px solid #555; background:rgba(255,255,255,0.1);';
         }
 
-        // --- AFFICHAGE DU TABLEAU ---
         function renderTable() {
             const data = getData('fit_coaches');
             const tbody = document.querySelector('#coachTable tbody');
             tbody.innerHTML = '';
             
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Aucun expert trouvé. Vérifiez data.js.</td></tr>';
+                return;
+            }
+
             data.forEach(row => {
-                // Génération visuelle de la note (Étoiles pleines + demi-étoile)
-                const stars = '<i class="fas fa-star"></i>'.repeat(Math.floor(row.rating));
-                const half = (row.rating % 1 !== 0) ? '<i class="fas fa-star-half-alt"></i>' : '';
+                const rating = row.rating || 5.0;
+                const votes = row.voteCount || 0;
                 
-                const speStyle = getSpeStyle(row.spe);
+                // Gestion affichage image (Avatar ou Icone)
+                let avatarHtml = `<div class="d-flex align-items-center">`;
+                if(row.image && row.image !== "") {
+                    avatarHtml += `<img src="${row.image}" class="coach-avatar" onerror="this.style.display='none'">`;
+                } else {
+                    avatarHtml += `<i class="fas fa-user-circle fs-3 me-2 text-secondary"></i>`;
+                }
+                avatarHtml += `<span>${row.nom}</span></div>`;
+
+                // Etoiles
+                let stars = '';
+                for(let i=1; i<=5; i++) {
+                    stars += i <= Math.round(rating) ? '<i class="fas fa-star text-warning"></i>' : '<i class="far fa-star text-secondary"></i>';
+                }
 
                 tbody.innerHTML += `
                     <tr>
                         <td class="text-id">#${row.id}</td>
-                        
+                        <td class="fw-bold">${avatarHtml}</td>
+                        <td><span class="badge rounded-pill fw-normal" style="${getSpeStyle(row.spe)}">${row.spe}</span></td>
                         <td>
-                            <span style="background-color: #ffffff; color: #000000; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 0.95rem; display: inline-block;">
-                                ${row.nom}
-                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold text-white">${rating.toFixed(1)}</span>
+                                <div class="small">${stars}</div>
+                                <small class="text-muted ms-1">(${votes} avis)</small>
+                            </div>
                         </td>
-                        
-                        <td><span style="padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border: 1px solid transparent; ${speStyle}">${row.spe}</span></td>
-                        
-                        <td>
-                            <span class="fw-bold" style="color:#FFD700; margin-right:5px;">${row.rating}</span>
-                            <span style="color:#FFD700; font-size:0.8rem;">${stars}${half}</span>
-                        </td>
-                        
                         <td class="text-end no-print">
                             <button class="btn btn-sm btn-custom p-1 px-2 border-0" 
                                     style="color: #bfbfbf !important;" 
-                                    onclick="editEntity(${row.id})" title="Modifier">
+                                    onclick="editEntity(${row.id})">
                                 <i class="fas fa-pen"></i>
                             </button>
-                            
                             <button class="btn btn-sm btn-custom p-1 px-2 border-0" 
                                     style="color: #FF453A !important;" 
-                                    onclick="deleteEntity(${row.id})" title="Supprimer">
+                                    onclick="deleteEntity(${row.id})">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
-        // --- GESTION DU MODAL ---
-        function openModal() { document.getElementById('entityForm').reset(); document.getElementById('coachId').value = ''; myModal.show(); }
-        
-        function editEntity(id) {
+        function openModal() { 
+            document.getElementById('entityForm').reset(); 
+            document.getElementById('coachId').value = ''; 
+            myModal.show(); 
+        }
+
+        function editEntity(id) { 
             const item = getData('fit_coaches').find(x => x.id === id);
             document.getElementById('coachId').value = item.id;
             document.getElementById('coachName').value = item.nom;
             document.getElementById('coachSpe').value = item.spe;
+            document.getElementById('coachImg').value = item.image || ''; // Charge l'image existante
             document.getElementById('coachRating').value = item.rating;
             myModal.show();
         }
 
-        function deleteEntity(id) {
-            if(confirm('Supprimer cet expert ?')) {
-                saveData('fit_coaches', getData('fit_coaches').filter(x => x.id !== id));
-                renderTable();
-            }
+        function deleteEntity(id) { 
+            if(confirm('Voulez-vous vraiment supprimer cet expert ?')) { 
+                saveData('fit_coaches', getData('fit_coaches').filter(x => x.id !== id)); 
+                renderTable(); 
+            } 
         }
 
-        // --- SAUVEGARDE ---
         document.getElementById('entityForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let data = getData('fit_coaches');
             const idParam = document.getElementById('coachId').value;
-            let finalId = idParam ? parseInt(idParam) : (data.length === 0 ? 1 : Math.max(...data.map(m => m.id)) + 1);
+            
+            // Si création, ID = max + 1
+            let finalId = idParam ? parseInt(idParam) : (data.length > 0 ? Math.max(...data.map(c => c.id)) + 1 : 1);
+
+            // On récupère les anciennes données pour ne pas perdre le nombre de votes en cas d'édition
+            let oldData = idParam ? data.find(x => x.id == finalId) : null;
 
             const newItem = {
                 id: finalId,
                 nom: document.getElementById('coachName').value,
                 spe: document.getElementById('coachSpe').value,
-                rating: parseFloat(document.getElementById('coachRating').value)
+                image: document.getElementById('coachImg').value, // Sauvegarde de l'image
+                rating: parseFloat(document.getElementById('coachRating').value),
+                voteCount: oldData ? oldData.voteCount : 0 // On garde les votes existants
             };
 
             if (idParam) data[data.findIndex(x => x.id == idParam)] = newItem;
             else data.push(newItem);
 
-            saveData('fit_coaches', data);
-            myModal.hide();
+            saveData('fit_coaches', data); 
+            myModal.hide(); 
             renderTable();
         });
 
