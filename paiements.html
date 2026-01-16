@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FIT MANAGER | Trésorerie</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar-wrapper">
+        <div class="dock-glass">
+            <div class="brand"><i class="fas fa-crown"></i> FIT MANAGER</div>
+            <nav class="d-flex flex-column">
+                <a href="index.html" class="nav-item"><i class="fas fa-chart-pie"></i> Vue Globale</a>
+                <a href="membres.html" class="nav-item"><i class="fas fa-users"></i> Membres</a>
+                <a href="machines.html" class="nav-item"><i class="fas fa-dumbbell"></i> Parc Machine</a>
+                <a href="coachs.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Experts</a>
+                <a href="paiements.html" class="nav-item active"><i class="fas fa-credit-card"></i> Trésorerie</a>
+                <a href="abonnements.html" class="nav-item"><i class="fas fa-gem"></i> Offres</a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="page-content">
+        
+        <div class="page-heading">
+            <h1>Historique Paiements</h1>
+            <p>Suivi des encaissements et abonnements en temps réel.</p>
+        </div>
+
+        <div class="top-actions no-print">
+            <button class="btn-custom" onclick="downloadCSV('fit_payments', 'tresorerie')"><i class="fas fa-download me-2"></i>CSV</button>
+            <button class="btn-custom" onclick="window.print()"><i class="fas fa-print me-2"></i>PDF</button>
+            <button class="btn-gold" onclick="openModal()"><i class="fas fa-plus me-2"></i>Encaisser</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table" id="payTable">
+                <thead>
+                    <tr>
+                        <th>ID Transaction</th>
+                        <th>Membre / Client</th>
+                        <th>Motif</th>
+                        <th>Date</th>
+                        <th>Moyen</th>
+                        <th>Montant</th>
+                        <th class="text-end no-print">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="entityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Encaisser un paiement</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="entityForm">
+                        <input type="hidden" id="payId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Client (Optionnel si membre)</label>
+                            <input type="text" class="form-control" id="payClient" placeholder="Nom du client ou 'Anonyme'">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Motif</label>
+                            <select class="form-select" id="payMotif">
+                                <option value="Séance Découverte">Séance Découverte</option>
+                                <option value="Boisson / Nutrition">Boisson / Nutrition</option>
+                                <option value="Accessoire">Accessoire</option>
+                                <option value="Régularisation">Régularisation</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Montant (€)</label>
+                                <input type="number" step="0.01" class="form-control" id="payAmount" required placeholder="0.00">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" id="payType">
+                                    <option>Carte Bancaire</option>
+                                    <option>Espèces</option>
+                                    <option>Virement</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" id="payDate" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-gold w-100 mt-2">VALIDER</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    
+    <script>
+        let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
+
+        // --- AFFICHAGE DES TRANSACTIONS ---
+        function renderTable() {
+            const data = getData('fit_payments');
+            
+            data.sort((a, b) => b.id - a.id);
+            
+            const tbody = document.querySelector('#payTable tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                let icon = 'money-bill-wave'; 
+                if(row.type && row.type.includes('Carte')) icon = 'credit-card';
+                if(row.type && row.type.includes('Virement')) icon = 'university';
+                
+                const clientDisplay = row.memberName ? 
+                    `<span class="fw-bold" style="color:#000!important; background:#fff; padding:5px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-user-circle" style="color:#000"></i> ${row.memberName}
+                    </span>` : 
+                    `<span class="text-muted" style="font-style:italic;">${row.client || 'Client de passage'}</span>`;
+
+                const displayId = row.memberId ? row.memberId : row.id;
+
+                // --- LOGIQUE DE COULEUR ET SIGNE POUR LE MONTANT ---
+                const amount = parseFloat(row.montant);
+                const isNegative = amount < 0;
+                const amountColor = isNegative ? "#FF453A" : "#32D74B"; // Rouge vs Vert
+                const amountText = isNegative ? `${amount.toFixed(2)} €` : `+${amount.toFixed(2)} €`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-id">#${displayId}</td>
+                        <td>${clientDisplay}</td>
+                        <td style="color:#000;">${row.motif}</td> 
+                        <td class="small" style="color:#000;">${row.date}</td> 
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-secondary">
+                                <i class="fas fa-${icon} me-1"></i> ${row.type}
+                            </span>
+                        </td>
+                        <td class="price-tag" style="color:${amountColor}; font-weight: bold;">${amountText}</td>
+                        
+                        <td class="text-end no-print">
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0" 
+                                    style="color: #FF453A !important;" 
+                                    onclick="deleteEntity(${row.id})" title="Annuler la transaction">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function openModal() { 
+            document.getElementById('entityForm').reset(); 
+            document.getElementById('payId').value = ''; 
+            document.getElementById('payDate').value = new Date().toISOString().split('T')[0]; 
+            myModal.show(); 
+        }
+
+        function deleteEntity(id) { 
+            if(confirm('Voulez-vous vraiment annuler cette transaction ? Cela affectera le Chiffre d\'Affaires global.')) { 
+                saveData('fit_payments', getData('fit_payments').filter(x => x.id !== id)); 
+                renderTable(); 
+            } 
+        }
+
+        document.getElementById('entityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let data = getData('fit_payments');
+            
+            const newId = Date.now(); // Utilisation d'un timestamp complet pour l'ID unique
+            
+            data.push({
+                id: newId,
+                client: document.getElementById('payClient').value || 'Client Passager',
+                memberName: null, 
+                memberId: null,
+                motif: document.getElementById('payMotif').value,
+                montant: parseFloat(document.getElementById('payAmount').value),
+                date: document.getElementById('payDate').value,
+                type: document.getElementById('payType').value
+            });
+            
+            saveData('fit_payments', data); 
+            myModal.hide(); 
+            renderTable();
+        });
+
+        function downloadCSV(key, f){ const d=getData(key); if(!d.length)return alert('Vide'); let c="\uFEFF"+Object.keys(d[0]).join(',')+'\n'; d.forEach(r=>c+=Object.values(r).join(',')+'\n'); const l=document.createElement('a'); l.href='data:text/csv;charset=utf-8,'+encodeURI(c); l.download=f+'.csv'; l.click();}
+
+        renderTable();
+    </script>
+</body>
+</html>

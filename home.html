@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT MANAGER | Become Unstoppable</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Orbitron:wght@400;600;900&family=Teko:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* --- ESTHÉTIQUE "DREAM SELLER" --- */
+        
+        :root {
+            --neon-gold: #FFD700;
+            --deep-black: #000000;
+        }
+
+        body { background-color: #020202; font-family: 'Inter', sans-serif; overflow-x: hidden; color: #fff; }
+
+        /* 1. NAVBAR INVISIBLE QUI APPARAIT */
+        .navbar-custom {
+            padding: 30px 0; transition: 0.5s; background: transparent;
+        }
+        .navbar-custom.scrolled {
+            background: rgba(0,0,0,0.9); padding: 15px 0; border-bottom: 1px solid rgba(255,215,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .nav-link {
+            font-family: 'Orbitron'; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #fff !important; opacity: 0.8; transition: 0.3s;
+        }
+        .nav-link:hover { opacity: 1; color: var(--neon-gold) !important; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+
+        /* 2. HERO SECTION : L'IMPACT */
+        .hero-section {
+            height: 100vh; position: relative; display: flex; align-items: center;
+            background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
+        }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0.3) 100%); }
+        
+        .hero-title {
+            font-family: 'Orbitron'; font-weight: 900; font-size: 6rem; line-height: 0.9;
+            text-transform: uppercase; color: #fff; margin-bottom: 20px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .hero-title span { color: transparent; -webkit-text-stroke: 2px var(--neon-gold); }
+        
+        /* TEXTE BLANC HERO */
+        .hero-subtitle {
+            font-size: 1.4rem; color: #ffffff; font-weight: 400; max-width: 600px; margin-bottom: 40px;
+            border-left: 3px solid var(--neon-gold); padding-left: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            opacity: 0.9;
+        }
+
+        /* BOUTON PULSANT */
+        .btn-dream {
+            background: var(--neon-gold); color: #000; font-family: 'Orbitron'; font-weight: 800;
+            padding: 18px 40px; letter-spacing: 2px; border-radius: 0; border: none;
+            position: relative; overflow: hidden; transition: 0.4s;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+        .btn-dream:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 215, 0, 0.4); color: #000; }
+
+        /* TÉMOIGNAGE D-ROSE */
+        .d-rose-card {
+            display: flex; align-items: center; gap: 20px; margin-top: 40px;
+            background: rgba(20, 20, 20, 0.8); /* Fond plus sombre pour lisibilité */
+            backdrop-filter: blur(10px);
+            padding: 20px 30px; border-radius: 4px; border-left: 4px solid var(--neon-gold);
+            max-width: 600px; transition: 0.3s;
+        }
+        .d-rose-card:hover { transform: translateX(10px); background: rgba(0,0,0,0.9); }
+        .d-rose-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-gold); }
+        .d-rose-text { font-style: italic; font-size: 1rem; color: #ffffff; margin-bottom: 5px; font-weight: 300; }
+        .d-rose-name { font-family: 'Orbitron'; font-size: 0.9rem; color: var(--neon-gold); letter-spacing: 1px; font-weight: 700; }
+
+        /* 3. BARRE MARQUES (Autorité) */
+        .brand-strip { padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.05); background: #050505; }
+        .brand-logo { color: #888; font-size: 2rem; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; margin: 0 30px; }
+
+        /* 4. SECTION PHILOSOPHIE (Image/Texte) */
+        .split-section { padding: 100px 0; }
+        .section-title { font-family: 'Orbitron'; font-size: 3rem; font-weight: 800; margin-bottom: 30px; color: #fff; }
+        
+        /* TEXTE BLANC PHILOSOPHIE */
+        .section-text { color: #ffffff; font-size: 1.15rem; line-height: 1.8; margin-bottom: 30px; font-weight: 300; opacity: 0.9; }
+        
+        .img-reveal {
+            width: 100%; height: 500px; object-fit: cover;
+            filter: grayscale(100%) contrast(1.2); transition: 0.5s;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+        }
+        .split-section:hover .img-reveal { filter: grayscale(0%) contrast(1.1); }
+
+        /* 5. ZONES DU CLUB (Galerie) */
+        .zone-card {
+            height: 400px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.4s; cursor: pointer;
+        }
+        .zone-bg {
+            position: absolute; inset: 0; background-size: cover; background-position: center;
+            transition: 0.6s; filter: brightness(0.6);
+        }
+        .zone-card:hover .zone-bg { transform: scale(1.1); filter: brightness(1); }
+        .zone-content {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px;
+            background: linear-gradient(0deg, #000 0%, transparent 100%);
+        }
+        .zone-title { font-family: 'Orbitron'; color: #fff; font-size: 1.5rem; margin-bottom: 5px; }
+        .zone-desc { color: var(--neon-gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0; transform: translateY(20px); transition: 0.4s; }
+        .zone-card:hover .zone-desc { opacity: 1; transform: translateY(0); }
+
+        /* 6. STATS LIVE */
+        .live-stats-bar { background: var(--neon-gold); padding: 60px 0; margin: 100px 0; position: relative; }
+        .live-stat-num { font-family: 'Orbitron'; font-size: 4rem; font-weight: 900; color: #000; line-height: 1; }
+        .live-stat-label { font-family: 'Inter'; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #000; }
+
+        /* FOOTER */
+        footer { border-top: 1px solid #222; background: #000; padding: 80px 0 30px; }
+        .footer-link { color: rgba(255,255,255,0.7); text-decoration: none; transition: 0.3s; }
+        .footer-link:hover { color: var(--neon-gold); }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) { 
+            .hero-title { font-size: 3.5rem; } 
+            .split-section { text-align: center; } 
+            .d-rose-card { margin-top: 30px; flex-direction: column; text-align: center; border-left: none; border-top: 4px solid var(--neon-gold); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-white" href="#" style="font-family:'Orbitron'; font-weight:900; letter-spacing:2px;">
+                <i class="fas fa-crown text-warning me-2"></i>FIT MANAGER
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="fas fa-bars text-white"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="nav">
+                <ul class="navbar-nav align-items-center gap-4">
+                    <li class="nav-item"><a href="#" class="nav-link">L'Expérience</a></li>
+                    <li class="nav-item"><a href="#zones" class="nav-link">Les Zones</a></li>
+                    <li class="nav-item"><a href="experts.html" class="nav-link">Nos Experts</a></li>
+                    <li class="nav-item"><a href="faq.html" class="nav-link">FAQ</a></li>
+                    <li class="nav-item"><a href="offres.html" class="nav-link">Adhésion</a></li>
+                    <li class="nav-item">
+                        <a href="index.html" class="btn btn-outline-light rounded-0 px-4 py-2" style="font-family:'Orbitron'; font-size:0.7rem; letter-spacing:1px;">STAFF ONLY</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container position-relative z-2">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="hero-title reveal">
+                        FORGE YOUR<br><span>LEGACY.</span>
+                    </h1>
+                    <p class="hero-subtitle reveal">
+                        Ici, pas d'excuses. Pas de compromis. Juste de l'acier, de la sueur et la poursuite implacable de la perfection. Bienvenue dans l'élite.
+                    </p>
+                    
+                    <div class="reveal">
+                        <a href="offres.html" class="btn-dream me-3">REJOINDRE LE CLAN</a>
+                        
+                        <div class="d-rose-card">
+                            <img src="images/derrick.jpg" 
+                                 alt="Derrick Rose" 
+                                 class="d-rose-img" 
+                                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Derrick_Rose_2024.jpg/440px-Derrick_Rose_2024.jpg'">
+                            <div>
+                                <div class="d-rose-text">"Fit Manager m'a rappelé pourquoi je me bats. C'est le seul endroit où la douleur devient un privilège."</div>
+                                <div class="d-rose-name">DERRICK ROSE - NBA MVP</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="brand-strip">
+        <div class="container d-flex justify-content-center flex-wrap opacity-50">
+            <span class="brand-logo">TECHNOGYM</span>
+            <span class="brand-logo">ROGUE</span>
+            <span class="brand-logo">HAMMER STRENGTH</span>
+            <span class="brand-logo">ELEIKO</span>
+        </div>
+    </div>
+
+    <section id="concept" class="split-section">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 reveal">
+                    <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=2070&auto=format&fit=crop" class="img-reveal" alt="Musculation Intense">
+                </div>
+                <div class="col-lg-6 reveal">
+                    <span class="text-warning text-uppercase ls-2 fw-bold mb-2 d-block">Notre Philosophie</span>
+                    <h2 class="section-title">PLUS QU'UNE SALLE.<br>UN TEMPLE.</h2>
+                    <p class="section-text">
+                        La médiocrité est une maladie. Fit Manager est le remède. Nous avons banni le superflu pour ne garder que l'essentiel : la performance pure.
+                    </p>
+                    <p class="section-text">
+                        Des plateaux d'haltérophilie olympique aux zones de cardio immersives, chaque centimètre carré a été conçu pour vous pousser au-delà de vos limites mentales et physiques.
+                    </p>
+                    <div class="d-flex gap-4 mt-4">
+                        <div>
+                            <h3 class="text-white font-orbitron mb-0">24/7</h3>
+                            <small class="text-white text-uppercase" style="opacity:0.9;">Accès Illimité</small>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-orbitron mb-0">1500m²</h3>
+                            <small class="text-white text-uppercase" style="opacity:0.9;">Espace Brut</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="live-stats-bar">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="live-stat-num" id="liveMembers">0</div>
+                    <div class="live-stat-label">Athlètes Actifs</div>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="live-stat-num" id="liveMachines">0</div>
+                    <div class="live-stat-label">Tonnes d'Acier</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="live-stat-num" id="liveCoaches">0</div>
+                    <div class="live-stat-label">Mentors</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="zones" class="pb-5 mb-5">
+        <div class="container">
+            <div class="text-center mb-5 reveal">
+                <h2 class="section-title">EXPLOREZ VOS TERRAINS DE JEU</h2>
+                <p class="text-white" style="opacity:0.9;">Quatre zones distinctes. Un seul objectif : La Victoire.</p>
+            </div>
+            
+            <div class="row g-0">
+                <div class="col-md-3 reveal">
+                    <div class="zone-card">
+                        <div class="zone-bg" style="background-image: url('https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?q=80&w=1974&auto=format&fit=crop');"></div>
+                        <div class="zone-content">
+                            <h3 class="zone-title">IRON ZONE</h3>
+                            <div class="zone-desc">Poids Libres & Force</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 reveal">
+                    <div class="zone-card">
+                        <div class="zone-bg" style="background-image: url('https://images.unsplash.com/photo-1574680096141-1cddd32e04ca?q=80&w=1974&auto=format&fit=crop');"></div>
+                        <div class="zone-content">
+                            <h3 class="zone-title">CARDIO LAB</h3>
+                            <div class="zone-desc">Technogym Artis®</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 reveal">
+                    <div class="zone-card">
+                        <div class="zone-bg" style="background-image: url('https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&w=2069&auto=format&fit=crop');"></div>
+                        <div class="zone-content">
+                            <h3 class="zone-title">FIGHT CLUB</h3>
+                            <div class="zone-desc">Boxe & MMA</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 reveal">
+                    <div class="zone-card">
+                        <div class="zone-bg" style="background-image: url('https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?q=80&w=2525&auto=format&fit=crop');"></div>
+                        <div class="zone-content">
+                            <h3 class="zone-title">RECOVERY</h3>
+                            <div class="zone-desc">Spa & Cryothérapie</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5" style="background: #000;">
+        <div class="container text-center py-5 border border-secondary border-opacity-10 reveal">
+            <h2 class="text-white display-4 font-orbitron fw-bold mb-4">ARRÊTEZ DE RÊVER.<br><span class="text-warning">COMMENCEZ À VIVRE.</span></h2>
+            <p class="text-white mb-5" style="opacity:0.9;">Les places sont limitées. L'excellence n'attend pas.</p>
+            <a href="offres.html" class="btn-dream">VOIR LES TARIFS</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-white font-orbitron">FIT MANAGER</h4>
+                    <p class="text-white small" style="opacity:0.8;">Paris • New York • Dubai</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="footer-link me-3"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="footer-link me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="footer-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="text-center mt-5 pt-4 border-top border-white border-opacity-10">
+                <p class="text-white small mb-0" style="opacity:0.7;">© 2024 FIT MANAGER Corp. Engineered for Greatness.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // SCROLL REVEAL SIMPLE
+        window.addEventListener('scroll', reveal);
+        function reveal(){
+            var reveals = document.querySelectorAll('.reveal');
+            for(var i=0; i < reveals.length; i++){
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if(elementTop < windowHeight - 100){
+                    reveals[i].style.opacity = "1";
+                    reveals[i].style.transform = "translateY(0)";
+                }
+            }
+        }
+        // Init CSS pour le reveal
+        document.querySelectorAll('.reveal').forEach(el => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(50px)";
+            el.style.transition = "all 0.8s ease-out";
+        });
+        reveal(); // Trigger initial
+
+        // NAVBAR SCROLL
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // BDD LIVE
+        document.addEventListener("DOMContentLoaded", function() {
+            const m = getData('fit_members').length;
+            const eq = getData('fit_machines').length;
+            const c = getData('fit_coaches').length;
+            document.getElementById('liveMembers').innerText = m + 842; 
+            document.getElementById('liveMachines').innerText = eq + 120;
+            document.getElementById('liveCoaches').innerText = c + 15;
+        });
+    </script>
+</body>
+</html>

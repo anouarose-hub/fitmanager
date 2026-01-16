@@ -1,0 +1,124 @@
+/* --- FIT MANAGER : DESIGN SYSTEM PREMIUM V3 --- */
+
+/* 1. VARIABLES & RESET */
+:root {
+    --bg-deep: #050505;
+    --bg-surface: #0f0f0f;
+    --gold-main: #D4AF37; /* Or métallique plus réaliste */
+    --gold-glow: rgba(212, 175, 55, 0.4);
+    --text-white: #ffffff;
+    --text-muted: #a0a0a0;
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --font-head: 'Orbitron', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-deep);
+    font-family: var(--font-body);
+    color: var(--text-white);
+    margin: 0;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* 2. TYPOGRAPHIE DE LUXE */
+h1, h2, h3, .brand, .navbar-brand {
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* 3. EFFETS VISUELS PRO */
+.glass-panel {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+}
+
+.text-gold {
+    color: var(--gold-main) !important;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* 4. BOUTONS HAUT DE GAMME */
+.btn-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+    color: #000 !important;
+    border: none;
+    font-weight: 700;
+    padding: 12px 30px;
+    border-radius: 2px; /* Coins carrés = Plus strict/pro */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-gold::after {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.2);
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 0.4s ease;
+    z-index: -1;
+}
+
+.btn-gold:hover::after { transform: scaleX(1); transform-origin: left; }
+.btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--gold-glow); color: #000; }
+
+.btn-outline-gold {
+    background: transparent;
+    border: 1px solid var(--gold-main);
+    color: var(--gold-main);
+    font-weight: 600;
+    padding: 12px 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+.btn-outline-gold:hover { background: var(--gold-glow); color: #fff; border-color: var(--gold-main); }
+
+/* 5. SIDEBAR (BACK-OFFICE) - Gardé pour la compatibilité */
+#sidebar-wrapper { width: 260px; padding: 0; height: 100vh; position: fixed; z-index: 1000; background: #080808; border-right: 1px solid #222; }
+.dock-glass { padding: 30px; height: 100%; display: flex; flex-direction: column; }
+.brand { color: #fff; margin-bottom: 50px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+.nav-item { color: #666; padding: 15px 0; display: flex; gap: 15px; transition: 0.3s; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+.nav-item:hover, .nav-item.active { color: var(--gold-main); padding-left: 10px; }
+#page-content { margin-left: 260px; width: calc(100% - 260px); padding: 50px; }
+
+/* 6. TABLEAUX (BACK-OFFICE) */
+.table-wrapper { background: #111; border-radius: 8px; border: 1px solid #222; overflow: hidden; }
+.table { color: #ccc; margin-bottom: 0; }
+.table th { background: #1a1a1a; color: #fff; border-bottom: 2px solid #333; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; padding: 20px; }
+.table td { padding: 20px; border-bottom: 1px solid #222; vertical-align: middle; }
+
+/* 7. ANIMATIONS (SCROLL REVEAL) */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease-out;
+}
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 8. BADGES & DIVERS */
+.status-badge { padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.bg-active { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
+.bg-suspend { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
+.bg-invite { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+
+/* BOUTONS ACTIONS */
+.btn-silver { background: #333; color: #fff !important; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
+.btn-silver:hover { background: #fff; color: #000 !important; }
+.btn-red-glow { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid rgba(255,0,0,0.2); padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
+.btn-red-glow:hover { background: #ff4d4d; color: #fff; }
+
+@media print { #sidebar-wrapper, .no-print { display: none; } #page-content { margin: 0; padding: 0; } }

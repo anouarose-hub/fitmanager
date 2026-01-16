@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FIT MANAGER | Membres</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar-wrapper">
+        <div class="dock-glass">
+            <div class="brand"><i class="fas fa-crown"></i> FIT MANAGER</div>
+            <nav class="d-flex flex-column">
+                <a href="index.html" class="nav-item"><i class="fas fa-chart-pie"></i> Vue Globale</a>
+                <a href="membres.html" class="nav-item active"><i class="fas fa-users"></i> Membres</a>
+                <a href="machines.html" class="nav-item"><i class="fas fa-dumbbell"></i> Parc Machine</a>
+                <a href="coachs.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Experts</a>
+                <a href="paiements.html" class="nav-item"><i class="fas fa-credit-card"></i> Trésorerie</a>
+                <a href="abonnements.html" class="nav-item"><i class="fas fa-gem"></i> Offres</a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="page-content">
+        <div class="page-heading">
+            <h1>Gestion des Adhérents</h1>
+            <p>Administration de la base de données et des flux financiers.</p>
+        </div>
+
+        <div class="top-actions no-print">
+            <button class="btn-custom" onclick="downloadCSV('fit_members', 'membres')"><i class="fas fa-download me-2"></i>CSV</button>
+            <button class="btn-custom" onclick="window.print()"><i class="fas fa-print me-2"></i>PDF</button>
+            <button class="btn-gold" onclick="openModal()"><i class="fas fa-plus me-2"></i>Ajouter</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table" id="membersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Identité</th>
+                        <th>Abonnement & Rang</th>
+                        <th>Date Inscription</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="entityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Fiche Adhérent</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="entityForm">
+                        <input type="hidden" id="memberId">
+                        <div class="mb-3">
+                            <label class="form-label">NOM COMPLET</label>
+                            <input type="text" class="form-control" id="memberName" required placeholder="Ex: Jean Dupont">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">PLAN (ABONNEMENT)</label>
+                                <select class="form-select" id="memberPlan" required></select> 
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">STATUT</label>
+                                <select class="form-select" id="memberStatus">
+                                    <option value="Actif">Actif</option>
+                                    <option value="Suspendu">Suspendu</option>
+                                    <option value="Invité">Invité</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-gold w-100 mt-2">ENREGISTRER LES MODIFICATIONS</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script> 
+    <script>
+        let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
+
+        function getPlanColor(planName) {
+            const name = planName ? planName.toLowerCase().trim() : 'standard';
+            if (name.includes('standard')) return '#A0A0A0';
+            if (name.includes('gold')) return '#FFD700';
+            if (name.includes('platinum')) return '#25C2A0';
+            if (name.includes('diamond')) return '#9B59B6';
+            return '#FF6B6B';
+        }
+
+        function loadPlansIntoSelect() {
+            const plans = getData('fit_plans');
+            const select = document.getElementById('memberPlan');
+            select.innerHTML = ''; 
+            if(plans.length === 0) {
+                select.innerHTML += `<option value="Standard" data-price="30">Standard (30€)</option>`;
+                select.innerHTML += `<option value="Gold" data-price="50">Gold (50€)</option>`;
+            } else {
+                plans.forEach(p => {
+                    select.innerHTML += `<option value="${p.nom}" data-price="${p.prix}">${p.nom} (${p.prix}€)</option>`;
+                });
+            }
+        }
+
+        function renderTable() {
+            const data = getData('fit_members');
+            const tbody = document.querySelector('#membersTable tbody');
+            tbody.innerHTML = '';
+            data.sort((a, b) => b.id - a.id);
+
+            data.forEach(row => {
+                let badgeClass = 'bg-active';
+                if(row.status === 'Suspendu') badgeClass = 'bg-suspend';
+                if(row.status === 'Invité') badgeClass = 'bg-invite';
+                const planColor = getPlanColor(row.plan);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-id">#${row.id}</td>
+                        <td class="fw-bold">${row.nom}</td>
+                        <td style="color:${planColor}; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">
+                            <i class="fas fa-crown me-2"></i>${row.plan}
+                        </td>
+                        <td class="text-date">${row.date}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                        <td class="text-end no-print">
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0" style="color: #bfbfbf !important;" onclick="editEntity(${row.id})" title="Modifier">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0" style="color: #FF453A !important;" onclick="deleteEntity(${row.id})" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function openModal() { 
+            document.getElementById('entityForm').reset(); 
+            document.getElementById('memberId').value = ''; 
+            loadPlansIntoSelect(); 
+            myModal.show(); 
+        }
+
+        function editEntity(id) { 
+            const m = getData('fit_members').find(x => x.id === id);
+            document.getElementById('memberId').value = m.id;
+            loadPlansIntoSelect(); 
+            document.getElementById('memberName').value = m.nom; 
+            document.getElementById('memberPlan').value = m.plan; 
+            document.getElementById('memberStatus').value = m.status; 
+            myModal.show(); 
+        }
+
+        function deleteEntity(id) { 
+            if(confirm('Supprimer ce membre ? (Attention: cela n\'annule pas ses paiements passés)')) { 
+                saveData('fit_members', getData('fit_members').filter(x => x.id !== id)); 
+                renderTable(); 
+            } 
+        }
+
+        document.getElementById('entityForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            
+            let members = getData('fit_members');
+            let payments = getData('fit_payments');
+            const idParam = document.getElementById('memberId').value;
+            const newStatus = document.getElementById('memberStatus').value;
+            const today = new Date().toISOString().split('T')[0];
+
+            // 1. Récupération des infos du plan
+            const selectElement = document.getElementById('memberPlan');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const planPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+            const planName = document.getElementById('memberPlan').value;
+            const memberName = document.getElementById('memberName').value;
+
+            // ------------------------------------------------------------
+            // 🔄 LOGIQUE DE RÉTRACTATION FINANCIÈRE 🔄
+            // ------------------------------------------------------------
+            if (idParam) {
+                // CAS : MODIFICATION
+                const oldMember = members.find(m => m.id == idParam);
+                
+                // Si on passe d'un état (Actif/Invité) à "Suspendu" -> On retire l'argent
+                if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
+                    payments.push({
+                        id: Date.now(),
+                        memberId: parseInt(idParam),
+                        memberName: memberName,
+                        motif: "RÉTRACTATION (Suspension) : " + planName,
+                        montant: -Math.abs(planPrice), // VALEUR NÉGATIVE
+                        date: today,
+                        type: "Remboursement système"
+                    });
+                } 
+                // Si on réactive un membre suspendu -> On refait payer
+                else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
+                    payments.push({
+                        id: Date.now(),
+                        memberId: parseInt(idParam),
+                        memberName: memberName,
+                        motif: "RÉACTIVATION : " + planName,
+                        montant: planPrice,
+                        date: today,
+                        type: "Carte Bancaire"
+                    });
+                }
+            } else {
+                // CAS : CRÉATION NOUVEAU MEMBRE
+                // On n'encaisse que si le statut n'est pas suspendu à la création
+                if (newStatus !== "Suspendu") {
+                    payments.push({
+                        id: Date.now(),
+                        memberId: Date.now() + 1,
+                        memberName: memberName,
+                        motif: "Abonnement initial : " + planName,
+                        montant: planPrice,
+                        date: today,
+                        type: "Carte Bancaire"
+                    });
+                }
+            }
+            saveData('fit_payments', payments);
+            // ------------------------------------------------------------
+
+            const newItem = { 
+                id: idParam ? parseInt(idParam) : Date.now(), 
+                nom: memberName, 
+                plan: planName, 
+                status: newStatus, 
+                date: idParam ? members.find(x => x.id == idParam).date : today 
+            };
+
+            if(idParam) members[members.findIndex(x => x.id == idParam)] = newItem;
+            else members.push(newItem);
+
+            saveData('fit_members', members);
+            myModal.hide();
+            renderTable();
+        });
+
+        function downloadCSV(k,f){ const d=getData(k); if(!d.length)return alert('Vide'); let c="\uFEFF"+Object.keys(d[0]).join(',')+'\n'; d.forEach(r=>c+=Object.values(r).join(',')+'\n'); const l=document.createElement('a'); l.href='data:text/csv;charset=utf-8,'+encodeURI(c); l.download=f+'.csv'; l.click();}
+        
+        renderTable();
+    </script>
+</body>
+</html>

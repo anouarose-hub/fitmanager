@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT MANAGER | Nos Experts</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { 
+            background-color: #020202; 
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #020202 60%);
+        }
+
+        /* NAVBAR */
+        .navbar-custom { padding: 25px 0; transition: 0.5s; background: transparent; }
+        .navbar-custom.scrolled { background: rgba(0,0,0,0.95); padding: 15px 0; border-bottom: 1px solid rgba(255,215,0,0.1); backdrop-filter: blur(10px); }
+        .nav-link { font-family: 'Orbitron'; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #fff !important; opacity: 0.7; }
+        .nav-link:hover, .nav-link.active { opacity: 1; color: #FFD700 !important; }
+
+        /* HERO */
+        .expert-hero { padding: 150px 0 60px; text-align: center; }
+        .expert-hero h1 { font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; text-transform: uppercase; color: #fff; }
+        .expert-hero p { color: #FFD700; font-family: 'Orbitron'; letter-spacing: 2px; font-size: 0.9rem; }
+
+        /* CARDS */
+        .expert-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: 0.4s;
+            height: 100%;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+        .expert-card:hover { transform: translateY(-10px); border-color: #FFD700; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+
+        .expert-img-container { height: 380px; overflow: hidden; background: #111; }
+        .expert-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.6s; }
+        .expert-card:hover .expert-img { filter: grayscale(0%) scale(1.05); }
+
+        .expert-info { padding: 25px; text-align: center; }
+        .expert-name { font-family: 'Orbitron'; font-size: 1.2rem; color: #fff; margin-bottom: 5px; text-transform: uppercase; }
+        .expert-specialty { color: #FFD700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
+        
+        /* RATING */
+        .star-rating { color: #333; font-size: 1.1rem; margin-bottom: 10px; }
+        .star-rating .fas.active { color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .rating-interactive i { cursor: pointer; transition: 0.2s; padding: 0 2px; }
+        .rating-interactive i:hover { transform: scale(1.4); color: #FFD700; }
+        
+        .rating-display { font-family: 'Orbitron'; color: #fff; font-size: 1.2rem; margin-top: 10px; display: block; }
+        .vote-count { color: #666; font-size: 0.75rem; display: block; margin-top: 5px; text-transform: uppercase; }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-white" href="home.html" style="font-family:'Orbitron'; font-weight:900; letter-spacing:2px;">
+                <i class="fas fa-crown text-warning me-2"></i>FIT MANAGER
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="fas fa-bars text-white"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="nav">
+                <ul class="navbar-nav align-items-center gap-4">
+                    <li class="nav-item"><a href="home.html" class="nav-link">Accueil</a></li>
+                    <li class="nav-item"><a href="experts.html" class="nav-link active">Les Experts</a></li>
+                    <li class="nav-item"><a href="offres.html" class="nav-link">Adhésion</a></li>
+                    <li class="nav-item">
+                        <a href="index.html" class="btn btn-outline-light rounded-0 px-4 py-2" style="font-family:'Orbitron'; font-size:0.7rem; letter-spacing:1px;">STAFF ONLY</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="expert-hero">
+        <div class="container">
+            <p class="reveal">The Mentors of Greatness</p>
+            <h1 class="reveal">NOS <span>EXPERTS</span></h1>
+            <p class="text-white opacity-50 mt-3 mx-auto" style="max-width: 600px; font-family:'Inter'; text-transform:none;">
+                Vos mentors légendaires sont ici. Utilisez vos votes pour classer l'élite mondiale du fitness.
+            </p>
+        </div>
+    </header>
+
+    <section class="pb-5">
+        <div class="container">
+            <div id="expertsGrid" class="row g-4">
+                </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container text-center py-4 border-top border-white border-opacity-10">
+            <p class="text-white small opacity-50 mb-0">© 2024 FIT MANAGER Corp. Engineered for Greatness.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // 1. SCROLL NAVBAR
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // 2. MAPPING MANUEL DES IMAGES LOCALES
+        // Assurez-vous que vos fichiers sont dans le dossier "images/"
+        const localExpertImages = {
+            "mike": "images/mike.jpg",
+            "israetel": "images/mike.jpg",
+            "ronnie": "images/ronnie.jpg",
+            "coleman": "images/ronnie.jpg",
+            "rocky": "images/rocky.jpg",
+            "balboa": "images/rocky.jpg",
+            "carter": "images/carter.jpg",
+            "greg": "images/greg.jpg",
+            "doucette": "images/greg.jpg"
+        };
+
+        const defaultPlaceholders = [
+            "https://images.unsplash.com/photo-1567013127542-490d757e51fc?q=80&w=600",
+            "https://images.unsplash.com/photo-1552072092-7f9b5563db95?q=80&w=600"
+        ];
+
+        // 3. RENDU DYNAMIQUE
+        function renderExperts() {
+            const coaches = getData('fit_coaches');
+            const grid = document.getElementById('expertsGrid');
+            grid.innerHTML = '';
+
+            if (coaches.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-white-50 my-5">Initialisation des experts...</div>';
+                return;
+            }
+
+            coaches.forEach((coach, index) => {
+                const nameLower = coach.nom.toLowerCase();
+                let imgUrl = coach.image;
+
+                // LOGIQUE DE LIEN MANUEL : 
+                // On vérifie si un mot-clé du nom correspond à nos images téléchargées
+                let foundLocal = false;
+                for (let key in localExpertImages) {
+                    if (nameLower.includes(key)) {
+                        imgUrl = localExpertImages[key];
+                        foundLocal = true;
+                        break;
+                    }
+                }
+
+                // Fallback si pas d'image en base ET pas de correspondance locale
+                if (!imgUrl || imgUrl === "") {
+                    imgUrl = defaultPlaceholders[index % defaultPlaceholders.length];
+                }
+
+                const rating = coach.rating || 0;
+                const votes = coach.voteCount || 0;
+
+                grid.innerHTML += `
+                    <div class="col-md-4 col-lg-3">
+                        <div class="expert-card reveal">
+                            <div class="expert-img-container">
+                                <img src="${imgUrl}" onerror="this.src='${defaultPlaceholders[0]}'" class="expert-img" alt="${coach.nom}">
+                            </div>
+                            <div class="expert-info">
+                                <span class="expert-specialty">${coach.specialite || 'Elite Mentor'}</span>
+                                <h3 class="expert-name">${coach.nom}</h3>
+                                <div class="star-rating rating-interactive" id="rating-${coach.id}">
+                                    ${generateStars(coach.id, rating)}
+                                </div>
+                                <span class="rating-display">${rating.toFixed(1)}</span>
+                                <span class="vote-count">${votes} VOTES</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            setTimeout(reveal, 100);
+        }
+
+        function generateStars(coachId, currentRating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                const activeClass = i <= Math.round(currentRating) ? 'fas active' : 'far';
+                html += `<i class="${activeClass} fa-star" onclick="vote(${coachId}, ${i})"></i>`;
+            }
+            return html;
+        }
+
+        window.vote = function(coachId, stars) {
+            let coaches = getData('fit_coaches');
+            const index = coaches.findIndex(c => c.id == coachId);
+            if (index !== -1) {
+                let coach = coaches[index];
+                if (!coach.voteCount) coach.voteCount = 0;
+                if (!coach.rating) coach.rating = 0;
+                const totalRating = (coach.rating * coach.voteCount) + stars;
+                coach.voteCount += 1;
+                coach.rating = totalRating / coach.voteCount;
+                coaches[index] = coach;
+                saveData('fit_coaches', coaches);
+                renderExperts();
+            }
+        };
+
+        function reveal(){
+            var reveals = document.querySelectorAll('.reveal');
+            for(var i=0; i < reveals.length; i++){
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if(elementTop < windowHeight - 50){
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+
+        window.addEventListener('scroll', reveal);
+        document.addEventListener("DOMContentLoaded", renderExperts);
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FIT MANAGER | Machines</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar-wrapper">
+        <div class="dock-glass">
+            <div class="brand"><i class="fas fa-crown"></i> FIT MANAGER</div>
+            <nav class="d-flex flex-column">
+                <a href="index.html" class="nav-item"><i class="fas fa-chart-pie"></i> Vue Globale</a>
+                <a href="membres.html" class="nav-item"><i class="fas fa-users"></i> Membres</a>
+                <a href="machines.html" class="nav-item active"><i class="fas fa-dumbbell"></i> Parc Machine</a>
+                <a href="coachs.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Experts</a>
+                <a href="paiements.html" class="nav-item"><i class="fas fa-credit-card"></i> Trésorerie</a>
+                <a href="abonnements.html" class="nav-item"><i class="fas fa-gem"></i> Offres</a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="page-content">
+        
+        <div class="page-heading">
+            <h1>Parc Machines</h1>
+            <p>Maintenance et suivi technique du matériel.</p>
+        </div>
+
+        <div class="top-actions no-print">
+            <button class="btn-custom" onclick="downloadCSV('fit_machines', 'machines')"><i class="fas fa-download me-2"></i>CSV</button>
+            <button class="btn-custom" onclick="window.print()"><i class="fas fa-print me-2"></i>PDF</button>
+            <button class="btn-gold" onclick="openModal()"><i class="fas fa-plus me-2"></i>Ajouter</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table" id="machineTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">ID</th>
+                        <th style="width: 40%">Nom Machine</th>
+                        <th style="width: 25%">État</th>
+                        <th style="width: 20%">Dernière Maintenance</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="entityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Fiche Machine</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="entityForm">
+                        <input type="hidden" id="machineId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">NOM DE LA MACHINE</label>
+                            <input type="text" class="form-control" id="machineName" required placeholder="Ex: Tapis Roulant X200">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">ÉTAT</label>
+                            <select class="form-select" id="machineState">
+                                <option value="Bon">Bon état</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="En panne">En panne</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">DATE MAINTENANCE</label>
+                            <input type="date" class="form-control" id="machineDate" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-gold w-100 mt-2">ENREGISTRER</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    
+    <script>
+        let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
+
+        function renderTable() {
+            const data = getData('fit_machines');
+            const tbody = document.querySelector('#machineTable tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                let badgeClass = 'bg-active'; 
+                let icon = 'check-circle';
+
+                if(row.etat === 'Maintenance') { badgeClass = 'bg-invite'; icon = 'tools'; }
+                if(row.etat === 'En panne') { badgeClass = 'bg-suspend'; icon = 'exclamation-triangle'; }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-id">#${row.id}</td>
+                        <td class="fw-bold">${row.nom}</td>
+                        <td>
+                            <span class="status-badge ${badgeClass}">
+                                <i class="fas fa-${icon} me-1"></i> ${row.etat}
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <span style="background-color: #ffffff; color: #000000; padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">
+                                ${row.maintenance}
+                            </span>
+                        </td>
+
+                        <td class="text-end no-print">
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0 text-secondary" onclick="editEntity(${row.id})" title="Modifier">
+                                <i class="fas fa-edit fa-lg"></i>
+                            </button>
+                            
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0 text-danger" onclick="deleteEntity(${row.id})" title="Supprimer">
+                                <i class="fas fa-trash fa-lg"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function openModal() { 
+            document.getElementById('entityForm').reset(); 
+            document.getElementById('machineId').value = ''; 
+            myModal.show(); 
+        }
+
+        // Fonction appelée quand on clique sur le Crayon
+        function editEntity(id) { 
+            const item = getData('fit_machines').find(x => x.id === id); 
+            // On remplit le formulaire avec les infos de la machine
+            document.getElementById('machineId').value = item.id; 
+            document.getElementById('machineName').value = item.nom; 
+            document.getElementById('machineState').value = item.etat; 
+            document.getElementById('machineDate').value = item.maintenance; 
+            myModal.show(); 
+        }
+
+        function deleteEntity(id) { 
+            if(confirm('Supprimer cette machine ?')) { 
+                saveData('fit_machines', getData('fit_machines').filter(x => x.id !== id)); 
+                renderTable(); 
+            } 
+        }
+
+        document.getElementById('entityForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            let data = getData('fit_machines');
+            const idParam = document.getElementById('machineId').value;
+            let finalId = idParam ? parseInt(idParam) : (data.length === 0 ? 1 : Math.max(...data.map(m => m.id)) + 1);
+            
+            const newItem = { 
+                id: finalId, 
+                nom: document.getElementById('machineName').value, 
+                etat: document.getElementById('machineState').value, 
+                maintenance: document.getElementById('machineDate').value 
+            };
+
+            if (idParam) data[data.findIndex(x => x.id == idParam)] = newItem; 
+            else data.push(newItem);
+
+            saveData('fit_machines', data); 
+            myModal.hide(); 
+            renderTable();
+        });
+
+        function downloadCSV(key, f){ const d=getData(key); if(!d.length)return alert('Vide'); let c="\uFEFF"+Object.keys(d[0]).join(',')+'\n'; d.forEach(r=>c+=Object.values(r).join(',')+'\n'); const l=document.createElement('a'); l.href='data:text/csv;charset=utf-8,'+encodeURI(c); l.download=f+'.csv'; l.click();}
+
+        renderTable();
+    </script>
+</body>
+</html>

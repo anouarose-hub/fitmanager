@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT MANAGER | Inscription</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { background-color: #020202; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* HEADER SIMPLE */
+        .checkout-header { text-align: center; padding: 60px 0 40px; }
+        .checkout-header h1 { font-family: 'Orbitron'; font-size: 3rem; font-weight: 800; margin-bottom: 10px; }
+        .checkout-header p { color: var(--gold-main); font-family: 'Orbitron'; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
+
+        /* BOX FORMULAIRE */
+        .form-container {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        /* INPUTS STYLISÉS */
+        .form-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 8px; }
+        .form-control, .form-select {
+            background: #0a0a0a; border: 1px solid #333; color: #fff;
+            padding: 12px 15px; border-radius: 8px;
+        }
+        .form-control:focus, .form-select:focus {
+            background: #111; border-color: var(--gold-main); color: #fff; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
+        /* RÉCAPITULATIF COMMANDE */
+        .order-summary {
+            background: linear-gradient(135deg, #111 0%, #050505 100%);
+            border: 1px solid var(--gold-main);
+            border-radius: 15px;
+            padding: 30px;
+            height: 100%;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.95rem; color: #ccc; }
+        .summary-total { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-family: 'Orbitron'; font-size: 1.5rem; color: #fff; font-weight: 700; }
+        .summary-total span:last-child { color: var(--gold-main); }
+
+        /* CARTE BANCAIRE (Visuel) */
+        .card-icon { position: absolute; right: 15px; top: 42px; color: #666; font-size: 1.2rem; }
+        .secure-badge { font-size: 0.8rem; color: #2ecc71; display: flex; align-items: center; gap: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container pt-4">
+        <a href="offres.html" class="text-secondary text-decoration-none small text-uppercase fw-bold hover-white"><i class="fas fa-arrow-left me-2"></i>Changer d'offre</a>
+    </div>
+
+    <div class="checkout-header">
+        <h1>REJOINDRE <span style="color: var(--gold-main);">L'ÉLITE</span></h1>
+        <p>Votre transformation commence maintenant.</p>
+    </div>
+
+    <div class="container pb-5">
+        <form id="joinForm">
+            <div class="row g-5">
+                
+                <div class="col-lg-8">
+                    <div class="form-container">
+                        
+                        <h4 class="mb-4 font-orbitron"><i class="fas fa-user me-2 text-gold"></i> Informations Personnelles</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Prénom</label>
+                                <input type="text" class="form-control" id="firstName" required placeholder="Ex: Thomas">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="lastName" required placeholder="Ex: Shelby">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required placeholder="thomas@example.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" id="phone" required placeholder="06 12 34 56 78">
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary my-4">
+
+                        <h4 class="mb-4 font-orbitron d-flex justify-content-between">
+                            <span><i class="fas fa-credit-card me-2 text-gold"></i> Paiement Sécurisé</span>
+                            <div class="secure-badge"><i class="fas fa-lock"></i> SSL ENCRYPTED</div>
+                        </h4>
+                        
+                        <div class="row g-3">
+                            <div class="col-12 position-relative">
+                                <label class="form-label">Numéro de carte</label>
+                                <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19">
+                                <i class="fab fa-cc-visa card-icon"></i>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Titulaire de la carte</label>
+                                <input type="text" class="form-control" placeholder="Même que le nom">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Expiration</label>
+                                <input type="text" class="form-control" placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">CVC</label>
+                                <input type="text" class="form-control" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="order-summary">
+                        <h4 class="font-orbitron mb-4 text-center">RÉCAPITULATIF</h4>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Offre Choisie</label>
+                            <select class="form-select" id="planSelect">
+                                </select>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Frais d'inscription</span>
+                            <span class="text-white">OFFERTS</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Accès Salle</span>
+                            <span class="text-white">Immédiat</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Engagement</span>
+                            <span class="text-white">Sans</span>
+                        </div>
+
+                        <div class="summary-total">
+                            <span>TOTAL</span>
+                            <span id="totalDisplay">0.00€</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-gold w-100 mt-4 py-3 fw-bold fs-5 shadow-lg">
+                            VALIDER LE PAIEMENT
+                        </button>
+                        
+                        <p class="text-center text-muted mt-3 small" style="font-size: 0.7rem;">
+                            En cliquant sur valider, vous acceptez nos CGV. Ceci est une simulation académique, aucun prélèvement ne sera effectué.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    
+    <script>
+        // 1. CHARGEMENT DES OFFRES & URL PARAM
+        document.addEventListener("DOMContentLoaded", function() {
+            const plans = getData('fit_plans');
+            const select = document.getElementById('planSelect');
+            
+            // Récupérer le paramètre ?plan=Gold depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const preSelectedPlan = urlParams.get('plan');
+
+            // Remplir le Select
+            plans.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.nom;
+                option.text = `${p.nom} - ${p.prix}€/mois`;
+                option.dataset.price = p.prix; // Stocker le prix
+                
+                // Sélectionner automatiquement si correspond à l'URL
+                if (preSelectedPlan && p.nom.toLowerCase() === preSelectedPlan.toLowerCase()) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            // Mettre à jour le prix total initial
+            updatePrice();
+
+            // Mettre à jour le prix quand on change l'option
+            select.addEventListener('change', updatePrice);
+        });
+
+        function updatePrice() {
+            const select = document.getElementById('planSelect');
+            const price = select.options[select.selectedIndex].dataset.price;
+            document.getElementById('totalDisplay').innerText = price + "€";
+        }
+
+        // 2. GESTION DE LA SOUMISSION (LE CŒUR DU SYSTÈME)
+        document.getElementById('joinForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Bloquer le rechargement
+
+            // Récupération des données
+            const nom = document.getElementById('lastName').value.toUpperCase();
+            const prenom = document.getElementById('firstName').value;
+            const fullName = `${prenom} ${nom}`;
+            const email = document.getElementById('email').value;
+            
+            const select = document.getElementById('planSelect');
+            const planName = select.value;
+            const planPrice = parseFloat(select.options[select.selectedIndex].dataset.price);
+            
+            const today = new Date().toISOString().split('T')[0];
+
+            // A. CRÉATION DU MEMBRE
+            let members = getData('fit_members');
+            // Générer un ID unique (Max ID + 1)
+            const newMemberId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+
+            const newMember = {
+                id: newMemberId,
+                nom: fullName,
+                plan: planName,
+                date: today,
+                status: "Actif", // Actif direct après paiement
+                email: email // Optionnel, on ne l'affiche pas dans le tableau dashboard mais on le garde
+            };
+            members.push(newMember);
+            saveData('fit_members', members);
+
+            // B. CRÉATION DU PAIEMENT (ENCISSEMENT)
+            let payments = getData('fit_payments');
+            const newPaymentId = Date.now(); // ID basé sur le temps
+
+            const newPayment = {
+                id: newPaymentId,
+                memberId: newMemberId,
+                memberName: fullName, // Lien direct
+                client: null,
+                motif: "Première Inscription : " + planName,
+                montant: planPrice,
+                date: today,
+                type: "Carte Bancaire (Site Web)"
+            };
+            payments.push(newPayment);
+            saveData('fit_payments', payments);
+
+            // C. SUCCÈS & REDIRECTION
+            alert(`FÉLICITATIONS ${prenom} ! \n\nVotre abonnement ${planName} est activé.\nVotre badge est disponible à l'accueil.\n\n(Données ajoutées au Dashboard Staff)`);
+            
+            // Redirection vers l'accueil
+            window.location.href = 'home.html';
+        });
+    </script>
+</body>
+</html>

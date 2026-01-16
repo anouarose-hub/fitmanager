@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FIT MANAGER | Experts</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar-wrapper">
+        <div class="dock-glass">
+            <div class="brand"><i class="fas fa-crown"></i> FIT MANAGER</div>
+            <nav class="d-flex flex-column">
+                <a href="index.html" class="nav-item"><i class="fas fa-chart-pie"></i> Vue Globale</a>
+                <a href="membres.html" class="nav-item"><i class="fas fa-users"></i> Membres</a>
+                <a href="machines.html" class="nav-item"><i class="fas fa-dumbbell"></i> Parc Machine</a>
+                <a href="coachs.html" class="nav-item active"><i class="fas fa-user-astronaut"></i> Experts</a>
+                <a href="paiements.html" class="nav-item"><i class="fas fa-credit-card"></i> Trésorerie</a>
+                <a href="abonnements.html" class="nav-item"><i class="fas fa-gem"></i> Offres</a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="page-content">
+        
+        <div class="page-heading">
+            <h1>Équipe Experts</h1>
+            <p>Gestion des coachs et évaluations clients.</p>
+        </div>
+
+        <div class="top-actions no-print">
+            <button class="btn-custom" onclick="downloadCSV('fit_coaches', 'experts')"><i class="fas fa-download me-2"></i>CSV</button>
+            <button class="btn-custom" onclick="window.print()"><i class="fas fa-print me-2"></i>PDF</button>
+            <button class="btn-gold" onclick="openModal()"><i class="fas fa-plus me-2"></i>Ajouter</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table" id="coachTable">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">ID</th>
+                        <th style="width: 30%">Nom Expert</th>
+                        <th style="width: 30%">Spécialité</th>
+                        <th style="width: 20%">Note Clients</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="entityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Profil Expert</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="entityForm">
+                        <input type="hidden" id="coachId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">NOM COMPLET</label>
+                            <input type="text" class="form-control" id="coachName" required placeholder="Ex: Mike Tyson">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">SPÉCIALITÉ</label>
+                            <select class="form-select" id="coachSpe">
+                                <option>Musculation</option>
+                                <option>Cardio</option>
+                                <option>Yoga</option>
+                                <option>Crossfit</option>
+                                <option>Boxe</option>
+                                <option>Nutrition</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">NOTE (0 à 5)</label>
+                            <input type="number" step="0.1" min="0" max="5" class="form-control" id="coachRating" required placeholder="5.0">
+                        </div>
+                        
+                        <button type="submit" class="btn-gold w-100 mt-2">ENREGISTRER</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data.js"></script>
+    
+    <script>
+        let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
+
+        /**
+         * FONCTION DE STYLE DYNAMIQUE
+         * Retourne le CSS pour colorer le badge selon la spécialité.
+         * (Ex: Rouge pour Muscu, Bleu pour Cardio, Vert pour Yoga...)
+         */
+        function getSpeStyle(spe) {
+            const s = spe.toLowerCase();
+            
+            // Couleurs "Néon" sur fond sombre (avec transparence)
+            if(s.includes('muscu')) return 'background:rgba(255, 69, 58, 0.15); color:#FF453A; border-color:rgba(255, 69, 58, 0.3);'; 
+            if(s.includes('cardio')) return 'background:rgba(10, 132, 255, 0.15); color:#5AC8FA; border-color:rgba(10, 132, 255, 0.3);'; 
+            if(s.includes('yoga')) return 'background:rgba(48, 209, 88, 0.15); color:#32D74B; border-color:rgba(48, 209, 88, 0.3);'; 
+            if(s.includes('boxe')) return 'background:rgba(255, 159, 10, 0.15); color:#FF9F0A; border-color:rgba(255, 159, 10, 0.3);'; 
+            if(s.includes('crossfit')) return 'background:rgba(191, 90, 242, 0.15); color:#BF5AF2; border-color:rgba(191, 90, 242, 0.3);'; 
+            
+            // Nutrition en Vert Émeraude
+            if(s.includes('nutrition') || s.includes('diet')) return 'background:rgba(0, 209, 178, 0.15); color:#00D1B2; border-color:rgba(0, 209, 178, 0.3);';
+
+            // Par défaut
+            return 'background:rgba(255,255,255,0.1); color:#fff; border-color:#555;';
+        }
+
+        // --- AFFICHAGE DU TABLEAU ---
+        function renderTable() {
+            const data = getData('fit_coaches');
+            const tbody = document.querySelector('#coachTable tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                // Génération visuelle de la note (Étoiles pleines + demi-étoile)
+                const stars = '<i class="fas fa-star"></i>'.repeat(Math.floor(row.rating));
+                const half = (row.rating % 1 !== 0) ? '<i class="fas fa-star-half-alt"></i>' : '';
+                
+                const speStyle = getSpeStyle(row.spe);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-id">#${row.id}</td>
+                        
+                        <td>
+                            <span style="background-color: #ffffff; color: #000000; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 0.95rem; display: inline-block;">
+                                ${row.nom}
+                            </span>
+                        </td>
+                        
+                        <td><span style="padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border: 1px solid transparent; ${speStyle}">${row.spe}</span></td>
+                        
+                        <td>
+                            <span class="fw-bold" style="color:#FFD700; margin-right:5px;">${row.rating}</span>
+                            <span style="color:#FFD700; font-size:0.8rem;">${stars}${half}</span>
+                        </td>
+                        
+                        <td class="text-end no-print">
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0" 
+                                    style="color: #bfbfbf !important;" 
+                                    onclick="editEntity(${row.id})" title="Modifier">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            
+                            <button class="btn btn-sm btn-custom p-1 px-2 border-0" 
+                                    style="color: #FF453A !important;" 
+                                    onclick="deleteEntity(${row.id})" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- GESTION DU MODAL ---
+        function openModal() { document.getElementById('entityForm').reset(); document.getElementById('coachId').value = ''; myModal.show(); }
+        
+        function editEntity(id) {
+            const item = getData('fit_coaches').find(x => x.id === id);
+            document.getElementById('coachId').value = item.id;
+            document.getElementById('coachName').value = item.nom;
+            document.getElementById('coachSpe').value = item.spe;
+            document.getElementById('coachRating').value = item.rating;
+            myModal.show();
+        }
+
+        function deleteEntity(id) {
+            if(confirm('Supprimer cet expert ?')) {
+                saveData('fit_coaches', getData('fit_coaches').filter(x => x.id !== id));
+                renderTable();
+            }
+        }
+
+        // --- SAUVEGARDE ---
+        document.getElementById('entityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let data = getData('fit_coaches');
+            const idParam = document.getElementById('coachId').value;
+            let finalId = idParam ? parseInt(idParam) : (data.length === 0 ? 1 : Math.max(...data.map(m => m.id)) + 1);
+
+            const newItem = {
+                id: finalId,
+                nom: document.getElementById('coachName').value,
+                spe: document.getElementById('coachSpe').value,
+                rating: parseFloat(document.getElementById('coachRating').value)
+            };
+
+            if (idParam) data[data.findIndex(x => x.id == idParam)] = newItem;
+            else data.push(newItem);
+
+            saveData('fit_coaches', data);
+            myModal.hide();
+            renderTable();
+        });
+
+        function downloadCSV(key, f){ const d=getData(key); if(!d.length)return alert('Vide'); let c="\uFEFF"+Object.keys(d[0]).join(',')+'\n'; d.forEach(r=>c+=Object.values(r).join(',')+'\n'); const l=document.createElement('a'); l.href='data:text/csv;charset=utf-8,'+encodeURI(c); l.download=f+'.csv'; l.click();}
+
+        renderTable();
+    </script>
+</body>
+</html>

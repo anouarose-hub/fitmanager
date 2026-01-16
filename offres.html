@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT MANAGER | Nos Abonnements</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { 
+            background-color: #020202;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #020202 60%); 
+        }
+
+        /* HEADER */
+        .header-page { text-align: center; padding: 100px 0 60px; }
+        .header-page h1 { font-family: 'Orbitron'; font-size: 3.5rem; color: #fff; font-weight: 800; letter-spacing: -1px; }
+        .header-page p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-top: 15px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+        /* DESIGN CARTE FLOTTANTE */
+        .plan-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: left;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* EFFET AU SURVOL */
+        .plan-card:hover { 
+            transform: translateY(-10px); 
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* STYLE SPÉCIFIQUE POUR L'OFFRE MYTHIQUE (LE GRAAL) */
+        .plan-card.mythique-glow {
+            border: 1px solid var(--gold-main);
+            background: linear-gradient(160deg, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+        }
+        
+        .plan-name { 
+            font-family: 'Orbitron'; font-size: 1.4rem; margin-bottom: 10px; color: #fff; letter-spacing: 1px; font-weight: 700; text-transform: uppercase;
+        }
+        .plan-price { 
+            font-size: 3rem; font-weight: 800; color: var(--gold-main); display: flex; align-items: baseline; gap: 5px;
+        }
+        .plan-price span { font-size: 0.9rem; color: #666; font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 30px 0; }
+
+        .plan-features { list-style: none; padding: 0; margin-bottom: 40px; flex-grow: 1; }
+        .plan-features li { 
+            margin-bottom: 15px; 
+            color: rgba(255,255,255,0.8); 
+            font-size: 0.9rem; 
+            display: flex; align-items: start; gap: 12px; 
+            line-height: 1.5;
+        }
+        .plan-features li i { color: var(--gold-main); font-size: 0.8rem; margin-top: 5px; }
+        .plan-features li.disabled { color: #444; text-decoration: line-through; opacity: 0.5; }
+        .plan-features li.disabled i { color: #444; }
+
+        /* BADGE POPULAIRE */
+        .badge-pop {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--gold-main); color: #000;
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
+            padding: 5px 10px; border-radius: 4px; letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container pt-4">
+        <a href="home.html" class="text-secondary text-decoration-none hover-white small text-uppercase fw-bold"><i class="fas fa-arrow-left me-2"></i>Retour Accueil</a>
+    </div>
+
+    <div class="header-page">
+        <h1>L'ÉLITE <span style="color: var(--gold-main);">PHYSIQUE</span></h1>
+        <p>De l'entretien physique à la performance absolue. Choisissez votre niveau d'engagement.</p>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4 justify-content-center" id="pricingContainer">
+            </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const plans = getData('fit_plans');
+            const container = document.getElementById('pricingContainer');
+            
+            // Fonction pour trier les plans du moins cher au plus cher (pour la logique visuelle)
+            plans.sort((a, b) => a.prix - b.prix);
+
+            if (plans.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">Aucune offre configurée dans le Dashboard.</p>';
+            } else {
+                plans.forEach(plan => {
+                    const name = plan.nom.toLowerCase();
+                    let features = '';
+                    let badge = '';
+                    let cardClass = '';
+
+                    // --- LOGIQUE HIERARCHIQUE CRÉATIVE ---
+
+                    if (name.includes('mythique')) {
+                        // LE SOMMET (God Tier)
+                        cardClass = 'mythique-glow';
+                        badge = '<div class="badge-pop">ULTIMATE</div>';
+                        features = `
+                            <li><i class="fas fa-check"></i> <strong>Accès TOTAL Monde</strong> (Tous clubs partenaires)</li>
+                            <li><i class="fas fa-check"></i> <strong>Coach Dédié 24/7</strong> (WhatsApp & Présentiel)</li>
+                            <li><i class="fas fa-check"></i> Espace Privé "The Vault" (Suites privées)</li>
+                            <li><i class="fas fa-check"></i> Nutrition & Compléments Inclus</li>
+                            <li><i class="fas fa-check"></i> Bilan Sanguin & Biomeca Mensuel</li>
+                            <li><i class="fas fa-check"></i> Service Blanchisserie & Voiturier</li>
+                        `;
+                    } 
+                    else if (name.includes('superstar')) {
+                        // L'INFLUENCEUR / PRO
+                        features = `
+                            <li><i class="fas fa-check"></i> Accès VIP 24/7 Prioritaire</li>
+                            <li><i class="fas fa-check"></i> 4 Séances Coaching / mois</li>
+                            <li><i class="fas fa-check"></i> Accès Studio Création (Photo/Vidéo)</li>
+                            <li><i class="fas fa-check"></i> Pressing Tenue de Sport</li>
+                            <li><i class="fas fa-check"></i> Accès Espace Récupération (Cryo/Sauna)</li>
+                            <li><i class="fas fa-check"></i> Casiers Privés Sécurisés</li>
+                        `;
+                    } 
+                    else if (name.includes('diamond')) {
+                        // LE HAUT DE GAMME
+                        badge = '<div class="badge-pop">POPULAIRE</div>';
+                        features = `
+                            <li><i class="fas fa-check"></i> Accès Illimité 24/7</li>
+                            <li><i class="fas fa-check"></i> 1 Bilan Corporel Complet / mois</li>
+                            <li><i class="fas fa-check"></i> Accès Spa & Hammam Illimité</li>
+                            <li><i class="fas fa-check"></i> Cours Collectifs "Signature"</li>
+                            <li><i class="fas fa-check"></i> Serviettes Fournies</li>
+                            <li><i class="fas fa-check"></i> Invité illimité le Week-end</li>
+                        `;
+                    } 
+                    else if (name.includes('platinum')) {
+                        // LE SÉRIEUX
+                        features = `
+                            <li><i class="fas fa-check"></i> Accès Illimité 06h-Minuit</li>
+                            <li><i class="fas fa-check"></i> Accès Espace Muscu & Cardio</li>
+                            <li><i class="fas fa-check"></i> Cours Collectifs Illimités</li>
+                            <li><i class="fas fa-check"></i> Accès Sauna (1x / semaine)</li>
+                            <li><i class="fas fa-check"></i> Programme d'entraînement App</li>
+                        `;
+                    } 
+                    else if (name.includes('gold')) {
+                        // LE STANDARD ++
+                        features = `
+                            <li><i class="fas fa-check"></i> Accès Illimité 06h-23h</li>
+                            <li><i class="fas fa-check"></i> Plateau Musculation & Cardio</li>
+                            <li><i class="fas fa-check"></i> Accès Douches & Vestiaires</li>
+                            <li><i class="fas fa-check"></i> 1 Cours Collectif / semaine</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Pas d'accès Spa</li>
+                        `;
+                    } 
+                    else {
+                        // STANDARD / BASE
+                        features = `
+                            <li><i class="fas fa-check"></i> Accès Heures Creuses (09h-16h)</li>
+                            <li><i class="fas fa-check"></i> Plateau Cardio Uniquement</li>
+                            <li><i class="fas fa-check"></i> Casier Standard</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Pas de Cours Collectifs</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Pas d'invités</li>
+                        `;
+                    }
+
+                    // Génération HTML
+                    container.innerHTML += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="plan-card ${cardClass}">
+                                ${badge}
+                                <div class="plan-header">
+                                    <div class="plan-name">${plan.nom}</div>
+                                    <div class="plan-price">${plan.prix}€<span>/mois</span></div>
+                                </div>
+                                <div class="divider"></div>
+                                <ul class="plan-features">
+                                    ${features}
+                                </ul>
+                                <a href="formulaire.html?plan=${encodeURIComponent(plan.nom)}" class="btn btn-outline-gold w-100 mt-auto">COMMENCER MAINTENANT</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
