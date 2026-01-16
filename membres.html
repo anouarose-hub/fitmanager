@@ -190,39 +190,43 @@
             const memberName = document.getElementById('memberName').value;
 
             // ------------------------------------------------------------
-            // 🔄 LOGIQUE DE RÉTRACTATION FINANCIÈRE 🔄
+            // 🔄 LOGIQUE DE RÉTRACTATION FINANCIÈRE (SÉCURISÉE) 🔄
             // ------------------------------------------------------------
             if (idParam) {
-                // CAS : MODIFICATION
-                const oldMember = members.find(m => m.id == idParam);
+                // SÉCURITÉ : On vérifie que l'ID est un nombre et que le membre existe
+                const targetId = parseInt(idParam);
+                const oldMember = members.find(m => m.id === targetId);
                 
-                // Si on passe d'un état (Actif/Invité) à "Suspendu" -> On retire l'argent
-                if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
-                    payments.push({
-                        id: Date.now(),
-                        memberId: parseInt(idParam),
-                        memberName: memberName,
-                        motif: "RÉTRACTATION (Suspension) : " + planName,
-                        montant: -Math.abs(planPrice), // VALEUR NÉGATIVE
-                        date: today,
-                        type: "Remboursement système"
-                    });
-                } 
-                // Si on réactive un membre suspendu -> On refait payer
-                else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
-                    payments.push({
-                        id: Date.now(),
-                        memberId: parseInt(idParam),
-                        memberName: memberName,
-                        motif: "RÉACTIVATION : " + planName,
-                        montant: planPrice,
-                        date: today,
-                        type: "Carte Bancaire"
-                    });
+                if (oldMember) {
+                    // CAS 1 : On passe à "Suspendu" -> Rétractation
+                    if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
+                        payments.push({
+                            id: Date.now(),
+                            memberId: targetId,
+                            memberName: memberName,
+                            motif: "RÉTRACTATION (Suspension) : " + planName,
+                            montant: -Math.abs(planPrice), // VALEUR NÉGATIVE
+                            date: today,
+                            type: "Remboursement système"
+                        });
+                    } 
+                    // CAS 2 : On réactive un membre suspendu -> Paiement
+                    else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
+                        payments.push({
+                            id: Date.now(),
+                            memberId: targetId,
+                            memberName: memberName,
+                            motif: "RÉACTIVATION : " + planName,
+                            montant: planPrice,
+                            date: today,
+                            type: "Carte Bancaire"
+                        });
+                    }
+                } else {
+                    console.error("Erreur critique : Membre introuvable pour l'ID " + targetId);
                 }
             } else {
                 // CAS : CRÉATION NOUVEAU MEMBRE
-                // On n'encaisse que si le statut n'est pas suspendu à la création
                 if (newStatus !== "Suspendu") {
                     payments.push({
                         id: Date.now(),
@@ -243,11 +247,15 @@
                 nom: memberName, 
                 plan: planName, 
                 status: newStatus, 
-                date: idParam ? members.find(x => x.id == idParam).date : today 
+                date: idParam ? (members.find(x => x.id == idParam)?.date || today) : today 
             };
 
-            if(idParam) members[members.findIndex(x => x.id == idParam)] = newItem;
-            else members.push(newItem);
+            if(idParam) {
+                const index = members.findIndex(x => x.id == idParam);
+                if(index !== -1) members[index] = newItem;
+            } else {
+                members.push(newItem);
+            }
 
             saveData('fit_members', members);
             myModal.hide();
