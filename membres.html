@@ -93,12 +93,15 @@
     <script>
         let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
 
+        // --- GESTION DES COULEURS (Mise à jour pour Superstar/Mythique) ---
         function getPlanColor(planName) {
             const name = planName ? planName.toLowerCase().trim() : 'standard';
             if (name.includes('standard')) return '#A0A0A0';
             if (name.includes('gold')) return '#FFD700';
             if (name.includes('platinum')) return '#25C2A0';
             if (name.includes('diamond')) return '#9B59B6';
+            if (name.includes('superstar')) return '#FF453A'; // Rouge Néon
+            if (name.includes('mythique')) return '#00D1B2'; // Cyan Néon
             return '#FF6B6B';
         }
 
@@ -120,12 +123,14 @@
             const data = getData('fit_members');
             const tbody = document.querySelector('#membersTable tbody');
             tbody.innerHTML = '';
+            
+            // Tri : Les plus récents en haut
             data.sort((a, b) => b.id - a.id);
 
             data.forEach(row => {
                 let badgeClass = 'bg-active';
                 if(row.status === 'Suspendu') badgeClass = 'bg-suspend';
-                if(row.status === 'Invité') badgeClass = 'bg-invite';
+                if(row.status === 'Invité' || row.status === 'Honneur') badgeClass = 'bg-invite';
                 const planColor = getPlanColor(row.plan);
 
                 tbody.innerHTML += `
@@ -157,22 +162,27 @@
         }
 
         function editEntity(id) { 
-            const m = getData('fit_members').find(x => x.id === id);
-            document.getElementById('memberId').value = m.id;
-            loadPlansIntoSelect(); 
-            document.getElementById('memberName').value = m.nom; 
-            document.getElementById('memberPlan').value = m.plan; 
-            document.getElementById('memberStatus').value = m.status; 
-            myModal.show(); 
+            // Utilisation de == pour la souplesse (string vs number)
+            const m = getData('fit_members').find(x => x.id == id);
+            
+            if (m) {
+                document.getElementById('memberId').value = m.id;
+                loadPlansIntoSelect(); 
+                document.getElementById('memberName').value = m.nom; 
+                document.getElementById('memberPlan').value = m.plan; 
+                document.getElementById('memberStatus').value = m.status; 
+                myModal.show(); 
+            }
         }
 
         function deleteEntity(id) { 
             if(confirm('Supprimer ce membre ? (Attention: cela n\'annule pas ses paiements passés)')) { 
-                saveData('fit_members', getData('fit_members').filter(x => x.id !== id)); 
+                saveData('fit_members', getData('fit_members').filter(x => x.id != id)); 
                 renderTable(); 
             } 
         }
 
+        // --- LOGIQUE METIER & FINANCIERE ---
         document.getElementById('entityForm').addEventListener('submit', function(e){
             e.preventDefault();
             
@@ -182,7 +192,7 @@
             const newStatus = document.getElementById('memberStatus').value;
             const today = new Date().toISOString().split('T')[0];
 
-            // 1. Récupération des infos du plan
+            // Récupération Prix
             const selectElement = document.getElementById('memberPlan');
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const planPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
@@ -190,28 +200,32 @@
             const memberName = document.getElementById('memberName').value;
 
             // ------------------------------------------------------------
-            // 🔄 LOGIQUE DE RÉTRACTATION FINANCIÈRE (SÉCURISÉE) 🔄
+            // 🔄 GESTION RÉTRACTATION / ACTIVATION
             // ------------------------------------------------------------
             if (idParam) {
-                // SÉCURITÉ : On vérifie que l'ID est un nombre et que le membre existe
+                // Conversion explicite en nombre pour être sûr de trouver l'ID
                 const targetId = parseInt(idParam);
                 const oldMember = members.find(m => m.id === targetId);
                 
                 if (oldMember) {
-                    // CAS 1 : On passe à "Suspendu" -> Rétractation
+                    console.log(`Modification Membre #${targetId} : ${oldMember.status} -> ${newStatus}`);
+
+                    // 1. RÉTRACTATION (Passage à Suspendu)
                     if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
+                        console.log("-> Rétractation appliquée (-€)");
                         payments.push({
                             id: Date.now(),
                             memberId: targetId,
                             memberName: memberName,
                             motif: "RÉTRACTATION (Suspension) : " + planName,
-                            montant: -Math.abs(planPrice), // VALEUR NÉGATIVE
+                            montant: -Math.abs(planPrice), // MONTANT NÉGATIF
                             date: today,
                             type: "Remboursement système"
                         });
                     } 
-                    // CAS 2 : On réactive un membre suspendu -> Paiement
+                    // 2. RÉACTIVATION (Sortie de Suspendu)
                     else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
+                        console.log("-> Réactivation appliquée (+€)");
                         payments.push({
                             id: Date.now(),
                             memberId: targetId,
@@ -223,11 +237,11 @@
                         });
                     }
                 } else {
-                    console.error("Erreur critique : Membre introuvable pour l'ID " + targetId);
+                    console.error("Erreur : Impossible de trouver le membre original pour ID " + targetId);
                 }
             } else {
                 // CAS : CRÉATION NOUVEAU MEMBRE
-                if (newStatus !== "Suspendu") {
+                if (newStatus !== "Suspendu" && newStatus !== "Invité" && newStatus !== "Honneur") {
                     payments.push({
                         id: Date.now(),
                         memberId: Date.now() + 1,
@@ -242,16 +256,22 @@
             saveData('fit_payments', payments);
             // ------------------------------------------------------------
 
+            // Calcul ID final (Création ou Mise à jour)
+            const finalId = idParam ? parseInt(idParam) : Date.now();
+            
+            // On garde la date d'inscription originale si c'est une modif
+            const originalDate = idParam ? (members.find(x => x.id == parseInt(idParam))?.date || today) : today;
+
             const newItem = { 
-                id: idParam ? parseInt(idParam) : Date.now(), 
+                id: finalId, 
                 nom: memberName, 
                 plan: planName, 
                 status: newStatus, 
-                date: idParam ? (members.find(x => x.id == idParam)?.date || today) : today 
+                date: originalDate
             };
 
             if(idParam) {
-                const index = members.findIndex(x => x.id == idParam);
+                const index = members.findIndex(x => x.id == parseInt(idParam));
                 if(index !== -1) members[index] = newItem;
             } else {
                 members.push(newItem);
