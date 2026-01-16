@@ -93,23 +93,23 @@
     <script>
         let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
 
-        // --- OUTILS VISUELS (Mise à jour pour les nouveaux plans) ---
+        // --- 1. GESTION DES COULEURS ---
         function getPlanColor(planName) {
             const name = planName ? planName.toLowerCase().trim() : 'standard';
             if (name.includes('standard')) return '#A0A0A0';
             if (name.includes('gold')) return '#FFD700';
             if (name.includes('platinum')) return '#25C2A0';
             if (name.includes('diamond')) return '#9B59B6';
-            if (name.includes('superstar')) return '#FF453A'; // Rouge pour Superstar
-            if (name.includes('mythique')) return '#00D1B2';  // Cyan pour Mythique
+            if (name.includes('superstar')) return '#FF453A'; // Rouge
+            if (name.includes('mythique')) return '#00D1B2'; // Cyan
             return '#FF6B6B';
         }
 
+        // --- 2. CHARGEMENT PLANS ---
         function loadPlansIntoSelect() {
             const plans = getData('fit_plans');
             const select = document.getElementById('memberPlan');
             select.innerHTML = ''; 
-            
             if(plans.length === 0) {
                 select.innerHTML += `<option value="Standard" data-price="30">Standard (30€)</option>`;
                 select.innerHTML += `<option value="Gold" data-price="50">Gold (50€)</option>`;
@@ -120,13 +120,13 @@
             }
         }
 
+        // --- 3. AFFICHAGE TABLEAU ---
         function renderTable() {
             const data = getData('fit_members');
             const tbody = document.querySelector('#membersTable tbody');
             tbody.innerHTML = '';
             
-            // Tri décroissant
-            data.sort((a, b) => b.id - a.id);
+            data.sort((a, b) => b.id - a.id); // Tri décroissant
 
             data.forEach(row => {
                 let badgeClass = 'bg-active';
@@ -155,7 +155,7 @@
             });
         }
 
-        // --- GESTION DU FORMULAIRE ---
+        // --- 4. MODAL & ACTIONS ---
         function openModal() { 
             document.getElementById('entityForm').reset(); 
             document.getElementById('memberId').value = ''; 
@@ -164,18 +164,15 @@
         }
 
         function editEntity(id) { 
-            // FORCE BRUTE : Comparaison de String pour éviter les bugs ID (10 vs "10")
-            const m = getData('fit_members').find(x => String(x.id) === String(id)); 
-            
-            if(m) {
+            // Comparaison string pour sécurité (10 vs "10")
+            const m = getData('fit_members').find(x => String(x.id) === String(id));
+            if (m) {
                 document.getElementById('memberId').value = m.id;
                 loadPlansIntoSelect(); 
                 document.getElementById('memberName').value = m.nom; 
                 document.getElementById('memberPlan').value = m.plan; 
                 document.getElementById('memberStatus').value = m.status; 
                 myModal.show(); 
-            } else {
-                alert("Erreur : Membre introuvable.");
             }
         }
 
@@ -186,11 +183,10 @@
             } 
         }
 
-        // --- CŒUR DU SYSTÈME : LOGIQUE FINANCIÈRE SÉCURISÉE ---
+        // --- 5. LOGIQUE FINANCIÈRE COMPLÈTE ---
         document.getElementById('entityForm').addEventListener('submit', function(e){
             e.preventDefault();
             
-            // Rechargement des données fraîches
             let members = getData('fit_members');
             let payments = getData('fit_payments');
             
@@ -198,54 +194,65 @@
             const newStatus = document.getElementById('memberStatus').value;
             const today = new Date().toISOString().split('T')[0];
 
-            // Récupération Prix
+            // Données Plan
             const selectElement = document.getElementById('memberPlan');
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const planPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
             const planName = document.getElementById('memberPlan').value;
             const memberName = document.getElementById('memberName').value;
 
-            // ------------------------------------------------------------
-            // 🔄 GESTION RÉTRACTATION / ACTIVATION
-            // ------------------------------------------------------------
+            // --- GESTION DES TRANSACTIONS ---
             if (idParam) {
-                // MODIFICATION : On cherche avec String() pour être sûr de trouver
+                // MODIFICATION EXISTANTE
+                const targetId = parseInt(idParam);
                 const oldMember = members.find(m => String(m.id) === String(idParam));
                 
                 if (oldMember) {
-                    console.log(`Statut avant: ${oldMember.status} -> Nouveau: ${newStatus}`);
-
-                    // A. Passage à SUSPENDU -> RÉTRACTATION
+                    // A. SUSPENSION (Rétractation)
                     if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
-                        alert(`🛑 RÉTRACTATION DÉTECTÉE : -${planPrice}€ retirés.`);
+                        alert(`🛑 SUSPENSION : -${planPrice}€ annulés dans la trésorerie.`);
                         payments.push({
                             id: Date.now(),
-                            memberId: parseInt(idParam),
+                            memberId: targetId,
                             memberName: memberName,
                             motif: "RÉTRACTATION (Suspension) : " + planName,
-                            montant: -Math.abs(planPrice), // Force Négatif
+                            montant: -Math.abs(planPrice),
                             date: today,
                             type: "Remboursement système"
                         });
                     } 
-                    // B. Réactivation -> PAIEMENT
+                    // B. RÉACTIVATION (Paiement)
                     else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
-                        alert(`✅ RÉACTIVATION DÉTECTÉE : +${planPrice}€ ajoutés.`);
+                        alert(`✅ RÉACTIVATION : +${planPrice}€ ajoutés.`);
                         payments.push({
                             id: Date.now(),
-                            memberId: parseInt(idParam),
+                            memberId: targetId,
                             memberName: memberName,
                             motif: "RÉACTIVATION : " + planName,
-                            montant: Math.abs(planPrice), // Force Positif
+                            montant: Math.abs(planPrice),
                             date: today,
                             type: "Carte Bancaire"
                         });
                     }
+                    // C. CHANGEMENT D'OFFRE (Upgrade/Downgrade) -- AJOUTÉ ICI --
+                    else if (oldMember.plan !== planName && newStatus !== "Suspendu") {
+                        alert(`🔄 CHANGEMENT OFFRE : ${oldMember.plan} -> ${planName} (+${planPrice}€)`);
+                        payments.push({
+                            id: Date.now(),
+                            memberId: targetId,
+                            memberName: memberName,
+                            motif: `CHANGEMENT D'OFFRE : ${planName}`,
+                            montant: Math.abs(planPrice),
+                            date: today,
+                            type: "Carte Bancaire"
+                        });
+                    }
+
                 } else {
-                    console.error("Erreur critique : Ancien membre introuvable pour ID " + idParam);
+                    console.error("Erreur critique : Ancien membre introuvable.");
                 }
             } else {
-                // CRÉATION : Nouveau membre
+                // CRÉATION NOUVEAU MEMBRE
                 if (newStatus !== "Suspendu" && newStatus !== "Invité" && newStatus !== "Honneur") {
                     payments.push({
                         id: Date.now(),
@@ -258,13 +265,12 @@
                     });
                 }
             }
-            saveData('fit_payments', payments); // Sauvegarde immédiate des paiements
+            saveData('fit_payments', payments); // Sauvegarde immédiate Tréso
 
-            // --- MISE À JOUR DU MEMBRE ---
-            const finalId = idParam ? parseInt(idParam) : (members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1);
-            
-            // On conserve la date d'origine si c'est une édition
+            // --- MISE À JOUR MEMBRE ---
+            const finalId = idParam ? parseInt(idParam) : Date.now();
             let originalDate = today;
+            
             if(idParam) {
                 const existing = members.find(m => String(m.id) === String(idParam));
                 if(existing) originalDate = existing.date;
@@ -285,7 +291,7 @@
                 members.push(newItem);
             }
 
-            saveData('fit_members', members);
+            saveData('fit_members', members); // Sauvegarde immédiate Membres
             myModal.hide();
             renderTable();
         });
