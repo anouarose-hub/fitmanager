@@ -93,15 +93,15 @@
     <script>
         let myModal = new bootstrap.Modal(document.getElementById('entityModal'));
 
-        // --- GESTION DES COULEURS (Mise à jour pour Superstar/Mythique) ---
+        // --- OUTILS VISUELS (Mise à jour pour les nouveaux plans) ---
         function getPlanColor(planName) {
             const name = planName ? planName.toLowerCase().trim() : 'standard';
             if (name.includes('standard')) return '#A0A0A0';
             if (name.includes('gold')) return '#FFD700';
             if (name.includes('platinum')) return '#25C2A0';
             if (name.includes('diamond')) return '#9B59B6';
-            if (name.includes('superstar')) return '#FF453A'; // Rouge Néon
-            if (name.includes('mythique')) return '#00D1B2'; // Cyan Néon
+            if (name.includes('superstar')) return '#FF453A'; // Rouge pour Superstar
+            if (name.includes('mythique')) return '#00D1B2';  // Cyan pour Mythique
             return '#FF6B6B';
         }
 
@@ -109,6 +109,7 @@
             const plans = getData('fit_plans');
             const select = document.getElementById('memberPlan');
             select.innerHTML = ''; 
+            
             if(plans.length === 0) {
                 select.innerHTML += `<option value="Standard" data-price="30">Standard (30€)</option>`;
                 select.innerHTML += `<option value="Gold" data-price="50">Gold (50€)</option>`;
@@ -124,7 +125,7 @@
             const tbody = document.querySelector('#membersTable tbody');
             tbody.innerHTML = '';
             
-            // Tri : Les plus récents en haut
+            // Tri décroissant
             data.sort((a, b) => b.id - a.id);
 
             data.forEach(row => {
@@ -154,6 +155,7 @@
             });
         }
 
+        // --- GESTION DU FORMULAIRE ---
         function openModal() { 
             document.getElementById('entityForm').reset(); 
             document.getElementById('memberId').value = ''; 
@@ -162,32 +164,36 @@
         }
 
         function editEntity(id) { 
-            // Utilisation de == pour la souplesse (string vs number)
-            const m = getData('fit_members').find(x => x.id == id);
+            // FORCE BRUTE : Comparaison de String pour éviter les bugs ID (10 vs "10")
+            const m = getData('fit_members').find(x => String(x.id) === String(id)); 
             
-            if (m) {
+            if(m) {
                 document.getElementById('memberId').value = m.id;
                 loadPlansIntoSelect(); 
                 document.getElementById('memberName').value = m.nom; 
                 document.getElementById('memberPlan').value = m.plan; 
                 document.getElementById('memberStatus').value = m.status; 
                 myModal.show(); 
+            } else {
+                alert("Erreur : Membre introuvable.");
             }
         }
 
         function deleteEntity(id) { 
-            if(confirm('Supprimer ce membre ? (Attention: cela n\'annule pas ses paiements passés)')) { 
+            if(confirm('Supprimer ce membre ?')) { 
                 saveData('fit_members', getData('fit_members').filter(x => x.id != id)); 
                 renderTable(); 
             } 
         }
 
-        // --- LOGIQUE METIER & FINANCIERE ---
+        // --- CŒUR DU SYSTÈME : LOGIQUE FINANCIÈRE SÉCURISÉE ---
         document.getElementById('entityForm').addEventListener('submit', function(e){
             e.preventDefault();
             
+            // Rechargement des données fraîches
             let members = getData('fit_members');
             let payments = getData('fit_payments');
+            
             const idParam = document.getElementById('memberId').value;
             const newStatus = document.getElementById('memberStatus').value;
             const today = new Date().toISOString().split('T')[0];
@@ -203,44 +209,43 @@
             // 🔄 GESTION RÉTRACTATION / ACTIVATION
             // ------------------------------------------------------------
             if (idParam) {
-                // Conversion explicite en nombre pour être sûr de trouver l'ID
-                const targetId = parseInt(idParam);
-                const oldMember = members.find(m => m.id === targetId);
+                // MODIFICATION : On cherche avec String() pour être sûr de trouver
+                const oldMember = members.find(m => String(m.id) === String(idParam));
                 
                 if (oldMember) {
-                    console.log(`Modification Membre #${targetId} : ${oldMember.status} -> ${newStatus}`);
+                    console.log(`Statut avant: ${oldMember.status} -> Nouveau: ${newStatus}`);
 
-                    // 1. RÉTRACTATION (Passage à Suspendu)
+                    // A. Passage à SUSPENDU -> RÉTRACTATION
                     if (oldMember.status !== "Suspendu" && newStatus === "Suspendu") {
-                        console.log("-> Rétractation appliquée (-€)");
+                        alert(`🛑 RÉTRACTATION DÉTECTÉE : -${planPrice}€ retirés.`);
                         payments.push({
                             id: Date.now(),
-                            memberId: targetId,
+                            memberId: parseInt(idParam),
                             memberName: memberName,
                             motif: "RÉTRACTATION (Suspension) : " + planName,
-                            montant: -Math.abs(planPrice), // MONTANT NÉGATIF
+                            montant: -Math.abs(planPrice), // Force Négatif
                             date: today,
                             type: "Remboursement système"
                         });
                     } 
-                    // 2. RÉACTIVATION (Sortie de Suspendu)
+                    // B. Réactivation -> PAIEMENT
                     else if (oldMember.status === "Suspendu" && newStatus !== "Suspendu") {
-                        console.log("-> Réactivation appliquée (+€)");
+                        alert(`✅ RÉACTIVATION DÉTECTÉE : +${planPrice}€ ajoutés.`);
                         payments.push({
                             id: Date.now(),
-                            memberId: targetId,
+                            memberId: parseInt(idParam),
                             memberName: memberName,
                             motif: "RÉACTIVATION : " + planName,
-                            montant: planPrice,
+                            montant: Math.abs(planPrice), // Force Positif
                             date: today,
                             type: "Carte Bancaire"
                         });
                     }
                 } else {
-                    console.error("Erreur : Impossible de trouver le membre original pour ID " + targetId);
+                    console.error("Erreur critique : Ancien membre introuvable pour ID " + idParam);
                 }
             } else {
-                // CAS : CRÉATION NOUVEAU MEMBRE
+                // CRÉATION : Nouveau membre
                 if (newStatus !== "Suspendu" && newStatus !== "Invité" && newStatus !== "Honneur") {
                     payments.push({
                         id: Date.now(),
@@ -253,14 +258,17 @@
                     });
                 }
             }
-            saveData('fit_payments', payments);
-            // ------------------------------------------------------------
+            saveData('fit_payments', payments); // Sauvegarde immédiate des paiements
 
-            // Calcul ID final (Création ou Mise à jour)
-            const finalId = idParam ? parseInt(idParam) : Date.now();
+            // --- MISE À JOUR DU MEMBRE ---
+            const finalId = idParam ? parseInt(idParam) : (members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1);
             
-            // On garde la date d'inscription originale si c'est une modif
-            const originalDate = idParam ? (members.find(x => x.id == parseInt(idParam))?.date || today) : today;
+            // On conserve la date d'origine si c'est une édition
+            let originalDate = today;
+            if(idParam) {
+                const existing = members.find(m => String(m.id) === String(idParam));
+                if(existing) originalDate = existing.date;
+            }
 
             const newItem = { 
                 id: finalId, 
@@ -271,7 +279,7 @@
             };
 
             if(idParam) {
-                const index = members.findIndex(x => x.id == parseInt(idParam));
+                const index = members.findIndex(x => String(x.id) === String(idParam));
                 if(index !== -1) members[index] = newItem;
             } else {
                 members.push(newItem);
